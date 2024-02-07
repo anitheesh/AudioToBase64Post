@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using AudioToBase64Post.Model;
+using AudioToBase64Post.Repository;
 
 namespace AudioToBase64Post.Controllers
 {
@@ -12,24 +13,32 @@ namespace AudioToBase64Post.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // POST api/<ValuesController>
+        private readonly IConfiguration _configuration;
+
+        public ValuesController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Class model)
         {
 
             try
             {
-                
+                Exception exception = new Exception();
+                audioRepo audio = new audioRepo(_configuration);
+                string result = audio.PostAudio(model);
+                if(result == "Success")
+                {
+                    return Ok("Success");
+                }
+                else
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, new { error = exception.Message });
 
-                    // Construct the response message including EmployeeID and Email
-                    var responseMessage = new
-                    {
-                        model.File,
-                        model.EmployeeID,
-                        model.Email
-                    };
-                    return Ok(responseMessage);
-                
+                }
+
+
             }
             catch (Exception e)
             {
